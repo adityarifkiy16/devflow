@@ -17,7 +17,9 @@
     <!-- Global Styles -->
     <link rel="stylesheet" href="{{ asset('assets/css/argon-dashboard.css?v=2.0.4') }}">
 
-    @vite(['resources/css/app.css', 'resources/js/app.js', 'resources/scss/app.scss', 'resource/css/app.css'])
+    <!-- Dragula css -->
+    <link rel="stylesheet" href="{{ asset('assets/css/dragula.min.css') }}">
+    @vite(['resources/css/app.css', 'resources/js/app.js', 'resources/scss/app.scss', 'resources/css/app.css'])
 </head>
 
 <body class="g-sidenav-show bg-gray-100">
@@ -29,15 +31,21 @@
         <x-footer />
     </main>
 
-
-
     <!-- Core JS -->
+    <!-- jQuery -->
     <script src="{{ asset('assets/js/main/jquery.min.js') }}"></script>
+    <script src="{{ asset('assets/js/main/dragula.min.js') }}"></script>
+    <!-- Bootstrap Bundle -->
     <script src="{{ asset('assets/js/main/bootstrap.bundle.min.js') }}"></script>
+    <!-- Popper -->
     <script src="{{ asset('assets/js/main/popper.min.js') }}"></script>
+    <!-- Perfect Scrollbar -->
     <script src="{{ asset('assets/js/plugins/perfect-scrollbar.min.js') }}"></script>
+    <!-- Smooth Scrollbar -->
     <script src="{{ asset('assets/js/plugins/smooth-scrollbar.min.js') }}"></script>
+    <!-- ChartJS -->
     <script src="{{ asset('assets/js/plugins/chartjs.min.js') }}"></script>
+    <!-- Argon Dashboard -->
     <script src="{{ asset('assets/js/argon-dashboard.min.js?v=2.0.4') }}"></script>
 
     <!-- logout JS -->
