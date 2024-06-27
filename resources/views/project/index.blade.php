@@ -8,18 +8,36 @@
                     <h3 class="mb-4">Daftar Proyek</h3>
                     <button class="btn text-white bg-primary mb-0 me-1 d-flex align-items-center" data-bs-toggle='modal' data-bs-target='#modal-tambah'><i class="ni ni-fat-add text-white me-1"></i>Tambah</button>
                 </div>
-                <div class="card-body px-0   pb-0">
-                    <div class="list-group mt-2" style="border-radius: 0 0 15px 15px;">
+                <div class="card-body px-2 pb-0">
+                    <div class="list-group" style="border-radius: 0 0 15px 15px;">
                         @if($projects->isEmpty())
                         <p class="text-center fs-5">Tidak ada project</p>
                         @else
                         @foreach($projects as $project)
-                        <a href="{{ route('project.kanban', $project->id) }}" class="list-group-item list-group-item-action">
-                            <div class="d-flex w-100 justify-content-between">
+                        <a href="{{ route('project.kanban', $project->id) }}" class="list-group-item list-group-item-action border-0">
+                            <div class="d-flex w-100 justify-content-between align-items-center">
                                 <h5 class="mb-1">{{ $project->name }}</h5>
+                                <div class="d-flex justify-content-end align-items-center">
+                                    <small class="text-muted text-xs d-flex align-items-center me-3">
+                                        <i class="fa fa-tasks me-1"></i> Todo: {{ $project->todo_tasks_count }}
+                                    </small>
+                                    <small class="text-muted text-xs d-flex align-items-center me-3">
+                                        <i class="fa fa-history me-1"></i> Progress: {{ $project->prog_tasks_count }}
+                                    </small>
+                                    <small class="text-muted text-xs d-flex align-items-center me-3">
+                                        <i class="fa fa-check me-1"></i> Done: {{ $project->done_tasks_count }}
+                                    </small>
+                                    <small class="text-muted text-xs d-flex align-items-center me-3">
+                                        <i class="fa fa-cloud me-1"></i> Live: {{ $project->prod_tasks_count }}
+                                    </small>
+                                    <small class="text-muted text-xs d-flex align-items-center">
+                                        <i class="fa fa-edit me-1"></i> Task: {{ $project->tasks_count }}
+                                    </small>
+                                </div>
                             </div>
                             <small class="text-muted">{{ $project->user->name }}</small>
                         </a>
+
                         @endforeach
                         <div class="d-flex justify-content-center mt-3">
                             {{ $projects->links('vendor.pagination.default') }}
@@ -71,7 +89,7 @@
             toast: true,
             position: "top-end",
             showConfirmButton: false,
-            timer: 3000,
+            timer: 2000,
             timerProgressBar: true,
             didOpen: (toast) => {
                 toast.onmouseenter = Swal.stopTimer;

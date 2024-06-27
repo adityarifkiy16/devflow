@@ -12,9 +12,34 @@ class ProjectController extends Controller
 {
     public function index()
     {
-        $projects = Project::with('user')->paginate(5);
+        // Misalkan status 'done' memiliki id 1 dan 'todo' memiliki id 2
+        $doneStatusId = 3;
+        $progressId = 2;
+        $prodId = 5;
+        $todoStatusId = 1;
+
+        // Mengambil data proyek dengan informasi pengguna terkait dan paginasi
+        $projects = Project::with('user')
+            ->withCount([
+                'tasks',
+                'tasks as done_tasks_count' => function ($query) use ($doneStatusId) {
+                    $query->where('status_id', $doneStatusId);
+                },
+                'tasks as prod_tasks_count' => function ($query) use ($prodId) {
+                    $query->where('status_id', $prodId);
+                },
+                'tasks as prog_tasks_count' => function ($query) use ($progressId) {
+                    $query->where('status_id', $progressId);
+                },
+                'tasks as todo_tasks_count' => function ($query) use ($todoStatusId) {
+                    $query->where('status_id', $todoStatusId);
+                }
+            ])
+            ->paginate(5);
+
         return view('project.index', compact('projects'));
     }
+
 
     public function store(Request $request)
     {
