@@ -10,14 +10,13 @@
                     {{ $status->title }}
                     <button class="btn text-white bg-gradient-warning mb-0 me-1 d-flex align-items-center p-2" data-bs-toggle='modal' data-bs-target='#modal-tambah-{{$status->id}}'><i class="ni ni-fat-add text-white"></i></button>
                 </div>
-                <div class="card-body">
-                    @foreach ($project->tasks->where('status_id', $status->id) as $task)
-                    <div class="card mt-2">
+                <div class="card-body sortable" data-status-id="{{ $status->id }}">
+                    @foreach ($project->tasks->where('status_id', $status->id)->sortBy('order') as $task)
+                    <div class="card mt-2 kanban-task" data-task-id="{{ $task->id }}">
                         <div class="card-body px-3 py-2">
                             <h5 class="card-title">{{ $task->title }}</h5>
                             <div class="d-flex justify-content-between mt-1">
-                                <p class="text-muted"><i class="fa fa-paperclip me-2"></i>attachment</p>
-                                <p class="card-text"><i class="fa fa-clock me-2"></i>{{ $task->created_at }}</p>
+                                <p class="card-text fs-6"><i class="fa fa-clock me-2"></i>{{ $task->created_at }}</p>
                             </div>
                             <a href="{{ route('project.kanban', $project->id) }}" class="stretched-link"></a>
                         </div>
@@ -69,6 +68,78 @@
 @endsection
 
 @push('script')
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Initialize Dragula
+        const containers = [];
+        const Toast = Swal.mixin({
+            toast: true,
+            position: "top-end",
+            showConfirmButton: false,
+            showClass: {
+                popup: `
+                animate__animated
+                animate__fadeInDown
+                animate__faster
+                `
+            },
+            timer: 3000,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+                toast.onmouseenter = Swal.stopTimer;
+                toast.onmouseleave = Swal.resumeTimer;
+            }
+        });
+        document.querySelectorAll('.sortable').forEach(function(element) {
+            containers.push(element);
+        });
+
+        dragula(containers).on('drop', function(el, target, source, sibling) {
+            // Get the status id and task id
+            var statusId = $(target).data('status-id');
+            var tasks = [];
+
+            // Calculate the new order of tasks
+            $(target).find('.kanban-task').each(function(index, element) {
+                tasks.push({
+                    id: $(element).data('task-id'),
+                    order: index + 1 // Order starts from 1
+                });
+            });
+
+            // Make AJAX call to update task status
+            $.ajax({
+                url: "{{ url('/task/update-task-status') }}",
+                method: "POST",
+                data: {
+                    status_id: statusId,
+                    tasks: tasks,
+                    _token: "{{ csrf_token() }}"
+                },
+                success: function(response) {
+                    if (response.code === 200) {
+                        Toast.fire({
+                            icon: "success",
+                            title: response.message
+                        });
+                    } else {
+                        Toast.fire({
+                            icon: "error",
+                            title: 'Unexpected Errors'
+                        });
+                    }
+                },
+                error: function(xhr) {
+                    let errorMessage = xhr.responseJSON.message ? xhr.responseJSON.message : 'An error occurred';
+                    Toast.fire({
+                        icon: "error",
+                        title: errorMessage
+                    });
+                }
+            });
+        });
+    });
+</script>
 <script>
     $('.form-tambah').submit(function(e) {
         e.preventDefault();
