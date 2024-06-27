@@ -25,7 +25,7 @@
 <body class="g-sidenav-show bg-gray-100">
     <div class="min-height-300 bg-gradient-warning position-absolute w-100"></div>
     <x-sidebar />
-    <main class="main-content position-relative border-radius-lg ">
+    <main class="main-content position-relative border-radius-lg" style="height: 100vh;">
         <x-navbar-dashboard :page="$page" :subpage="$subpage" :title="$title" />
         @yield('content')
         <x-footer />
