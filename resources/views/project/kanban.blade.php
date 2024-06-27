@@ -4,19 +4,21 @@
     <h3 class="mb-4 text-white">{{ $project->name }} - Kanban Task</h3>
     <div class="row">
         @foreach($statuses as $status)
-        <div class="col-md-4 mt-3">
+        <div class="col-md-3 mt-3 p-1">
             <div class="card shadow-sm">
                 <div class="card-header bg-gradient-primary text-white d-flex justify-content-between align-items-center">
                     {{ $status->title }}
                     <button class="btn text-white bg-gradient-warning mb-0 me-1 d-flex align-items-center p-2" data-bs-toggle='modal' data-bs-target='#modal-tambah-{{$status->id}}'><i class="ni ni-fat-add text-white"></i></button>
                 </div>
-                <div class="card-body sortable" data-status-id="{{ $status->id }}">
+                <div class="card-body sortable px-2" data-status-id="{{ $status->id }}">
                     @foreach ($project->tasks->where('status_id', $status->id)->sortBy('order') as $task)
                     <div class="card mt-2 kanban-task" data-task-id="{{ $task->id }}">
                         <div class="card-body px-3 py-2">
                             <h5 class="card-title">{{ $task->title }}</h5>
                             <div class="d-flex justify-content-between mt-1">
-                                <p class="card-text fs-6"><i class="fa fa-clock me-2"></i>{{ $task->created_at }}</p>
+                                <p class="card-text text-xs"><i class="fa fa-clock fa-xs me-1"></i>
+                                    {{ \Carbon\Carbon::parse($task->created_at)->isToday() ? 'Today' : \Carbon\Carbon::parse($task->created_at)->format('Y-m-d') }}
+                                </p>
                             </div>
                             <a href="{{ route('project.kanban', $project->id) }}" class="stretched-link"></a>
                         </div>
