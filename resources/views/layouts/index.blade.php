@@ -19,7 +19,7 @@
 
     <!-- Dragula css -->
     <link rel="stylesheet" href="{{ asset('assets/css/dragula.min.css') }}">
-    @vite(['resources/css/app.css', 'resources/js/app.js', 'resources/scss/app.scss', 'resources/css/app.css'])
+    @vite(['resources/css/app.css', 'resources/js/app.js', 'resources/scss/app.scss'])
 </head>
 
 <body class="g-sidenav-show bg-gray-100">
