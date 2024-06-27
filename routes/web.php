@@ -17,5 +17,9 @@ Route::middleware('auth')->group(function () {
     Route::resource('users', UserController::class);
     Route::resource('project', ProjectController::class);
     Route::get('/projects/{project}/kanban', [ProjectController::class, 'kanban'])->name('project.kanban');
-    Route::post('/task/store', [TaskController::class, 'store']);
+
+    Route::prefix('task')->group(function () {
+        Route::post('/store', [TaskController::class, 'store']);
+        Route::post('/update-task-status', [TaskController::class, 'updateTask']);
+    });
 });
