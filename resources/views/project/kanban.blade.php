@@ -8,14 +8,18 @@
             <div class="card shadow-sm">
                 <div class="card-header bg-gradient-primary text-white d-flex justify-content-between align-items-center">
                     {{ $status->title }}
-                    <button class="btn text-white bg-gradient-warning mb-0 me-1 d-flex align-items-center p-2" data-bs-toggle='modal' data-bs-target='#modal-tambah-{{$status->id}}'><i class="ni ni-fat-add text-white me-1"></i></button>
+                    <button class="btn text-white bg-gradient-warning mb-0 me-1 d-flex align-items-center p-2" data-bs-toggle='modal' data-bs-target='#modal-tambah-{{$status->id}}'><i class="ni ni-fat-add text-white"></i></button>
                 </div>
                 <div class="card-body">
                     @foreach ($project->tasks->where('status_id', $status->id) as $task)
-                    <div class="kanban-task card mb-2">
-                        <div class="card-body">
+                    <div class="card mt-2">
+                        <div class="card-body px-3 py-2">
                             <h5 class="card-title">{{ $task->title }}</h5>
-                            <p class="card-text">{{ $task->description }}</p>
+                            <div class="d-flex justify-content-between mt-1">
+                                <p class="text-muted"><i class="fa fa-paperclip me-2"></i>attachment</p>
+                                <p class="card-text"><i class="fa fa-clock me-2"></i>{{ $task->created_at }}</p>
+                            </div>
+                            <a href="{{ route('project.kanban', $project->id) }}" class="stretched-link"></a>
                         </div>
                     </div>
                     @endforeach
@@ -35,20 +39,18 @@
                             <h3 class="font-weight-bolder text-primary text-gradient">Tambah Task</h3>
                         </div>
                         <div class="card-body pb-3">
-                            <form role="form text-left" id="form-tambah">
+                            <form role="form text-left" class="form-tambah" id="form-tambah-{{$status->id}}">
                                 <div class="row">
                                     <div class="col">
                                         <input type="hidden" name='status_id' value="{{ $status->id }}">
                                         <input type="hidden" name='project_id' value="{{ $project->id }}">
                                         <label>Nama Task</label>
                                         <div class="input-group mb-3">
-                                            <input type="text" name="title" class="form-control" placeholder="Project Name" aria-label="Name" aria-describedby="name-addon">
+                                            <input type="text" name="title" class="form-control" placeholder="Task Name" aria-label="Name" aria-describedby="name-addon">
                                         </div>
-                                    </div>
-                                    <div class="col">
                                         <label>Description</label>
                                         <div class="input-group mb-3">
-                                            <input type="text" name="description" class="form-control" placeholder="Project Name" aria-label="Name" aria-describedby="name-addon">
+                                            <textarea name="description" class="form-control" placeholder="Description..." aria-label="Name" aria-describedby="name-addon"></textarea>
                                         </div>
                                     </div>
                                     <div class="text-center">
@@ -68,7 +70,7 @@
 
 @push('script')
 <script>
-    $('#form-tambah').submit(function(e) {
+    $('.form-tambah').submit(function(e) {
         e.preventDefault();
 
         const Toast = Swal.mixin({
