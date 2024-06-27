@@ -6,6 +6,7 @@ use App\Models\Project;
 use App\Models\Status;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class ProjectController extends Controller
 {
@@ -37,7 +38,7 @@ class ProjectController extends Controller
     {
         $project = Project::findOrFail($id);
         $tasks = $project->task;
-        $statuses = Status::whereIn('slug', ['to-do', 'in-progress', 'done'])->get();
+        $statuses = Status::whereIn('slug', ['to-do', 'in-progress', 'done', 'production'])->get();
         return view('project.kanban', compact('project', 'tasks', 'statuses'));
     }
 }
