@@ -12,7 +12,7 @@ class TaskController extends Controller
     {
         $rules = [
             'title' => 'required|string|max:255',
-            'description' => 'required|string|max:255',
+            'description' => 'max:255',
             'status_id' => 'required|exists:mstatuses,id',
             'project_id' => 'required|exists:mprojects,id',
         ];
@@ -35,5 +35,27 @@ class TaskController extends Controller
             'code' => 200,
             'message' => 'Task created successfuly'
         ]);
+    }
+
+    public function updateTask(Request $request)
+    {
+        $rules = [
+            'status_id' => 'required|exists:mstatuses,id',
+            'tasks.*.id' => 'required|exists:mtasks,id',
+            'tasks.*.order' => 'required|integer',
+        ];
+
+        $customMessages = [
+            'required' => 'The :attribute field is required.',
+        ];
+
+        $data = $request->validate($rules, $customMessages);
+        foreach ($data['tasks'] as $taskData) {
+            $task = Task::find($taskData['id']);
+            $task->status_id = $data['status_id'];
+            $task->order = $taskData['order'];
+            $task->save();
+        }
+        return response()->json(['code' => 200, 'message' => 'Tasks updated successfully.']);
     }
 }
