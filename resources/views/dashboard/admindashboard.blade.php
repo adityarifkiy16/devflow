@@ -3,7 +3,9 @@
 @if(Auth::user()->role_id === 1)
 <div class="container-fluid py-4">
   <div class="row">
-    <x-banner title="Jumlah User" amount="{{$userCount}} orang" typeIcon="user" />
+    <x-banner title="User" amount="{{$userCount}} orang" typeIcon="user" />
+    <x-banner title="Task" amount="{{$taskCount}} task" typeIcon="tasks" />
+    <x-banner title="Project" amount="{{$projectCount}} project" typeIcon="pen" />
   </div>
   <div class="row mt-4">
     <div class="col-lg-12 mb-lg-0 mb-4">
@@ -19,7 +21,6 @@
       </div>
     </div>
   </div>
-  <x-footer />
 </div>
 @endsection
 @push('script')
