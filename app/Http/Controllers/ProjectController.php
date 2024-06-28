@@ -15,7 +15,7 @@ class ProjectController extends Controller
         // Misalkan status 'done' memiliki id 1 dan 'todo' memiliki id 2
         $doneStatusId = 3;
         $progressId = 2;
-        $prodId = 5;
+        $prodId = 4;
         $todoStatusId = 1;
 
         // Mengambil data proyek dengan informasi pengguna terkait dan paginasi
