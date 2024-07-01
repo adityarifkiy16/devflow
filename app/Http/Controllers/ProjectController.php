@@ -12,33 +12,35 @@ class ProjectController extends Controller
 {
     public function index()
     {
-        // Misalkan status 'done' memiliki id 1 dan 'todo' memiliki id 2
-        $doneStatusId = 3;
-        $progressId = 2;
-        $prodId = 4;
-        $todoStatusId = 1;
+        $statuses = Status::whereIn('slug', ['done', 'in-progress', 'production', 'to-do'])
+            ->get()
+            ->keyBy('slug')
+            ->map(function ($status) {
+                return $status->id;
+            });
 
-        // Mengambil data proyek dengan informasi pengguna terkait dan paginasi
+        dd($statuses);
+
         $projects = Project::with('user')
             ->withCount([
                 'tasks',
-                'tasks as done_tasks_count' => function ($query) use ($doneStatusId) {
-                    $query->where('status_id', $doneStatusId);
+                'tasks as done_tasks_count' => function ($query) use ($statuses) {
+                    $query->where('status_id', $statuses['done']);
                 },
-                'tasks as prod_tasks_count' => function ($query) use ($prodId) {
-                    $query->where('status_id', $prodId);
+                'tasks as prod_tasks_count' => function ($query) use ($statuses) {
+                    $query->where('status_id', $statuses['production']);
                 },
-                'tasks as prog_tasks_count' => function ($query) use ($progressId) {
-                    $query->where('status_id', $progressId);
+                'tasks as prog_tasks_count' => function ($query) use ($statuses) {
+                    $query->where('status_id', $statuses['in-progress']);
                 },
-                'tasks as todo_tasks_count' => function ($query) use ($todoStatusId) {
-                    $query->where('status_id', $todoStatusId);
+                'tasks as todo_tasks_count' => function ($query) use ($statuses) {
+                    $query->where('status_id', $statuses['to-do']);
                 }
-            ])
-            ->paginate(5);
+            ])->paginate(5);
 
         return view('project.index', compact('projects'));
     }
+
 
 
     public function store(Request $request)
