@@ -19,8 +19,6 @@ class ProjectController extends Controller
                 return $status->id;
             });
 
-        dd($statuses);
-
         $projects = Project::with('user')
             ->withCount([
                 'tasks',
