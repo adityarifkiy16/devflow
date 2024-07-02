@@ -1,6 +1,6 @@
 @extends('layouts.index', ['title' => $project->name, 'page' => 'Project', 'subpage' => 'Kanban Task'])
 @section('content')
-<div class="container-fluid my-5">
+<div class="container-fluid mt-5">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h3 class="text-white">{{ $project->name }} - Kanban Task</h3>
         <form role="form text-left" class="project-delete" id="project-delete">
@@ -8,7 +8,7 @@
             <button type="submit" class="btn bg-danger btn-lg btn-rounded w-100 mb-0 text-white">Delete</button>
         </form>
     </div>
-    <div class="row">
+    <div class="row overflow-hidden">
         @foreach($statuses as $status)
         <div class="col-md-3 mt-3 p-1">
             <div class="card shadow-sm">
@@ -16,7 +16,7 @@
                     {{ $status->title }}
                     <button class="btn text-white bg-gradient-warning mb-0 me-1 d-flex align-items-center p-2" data-bs-toggle='modal' data-bs-target='#modal-tambah-{{$status->id}}'><i class="ni ni-fat-add text-white"></i></button>
                 </div>
-                <div class="card-body sortable px-2" data-status-id="{{ $status->id }}">
+                <div class="card-body sortable px-2 overflow-auto" style="max-height: 400px;" data-status-id="{{ $status->id }}">
                     @foreach ($project->tasks->where('status_id', $status->id)->sortBy('order') as $task)
                     <div class="card mt-2 kanban-task" data-task-id="{{ $task->id }}">
                         <div class="card-body px-3 py-2">
@@ -52,7 +52,7 @@
                                 </form>
 
                                 <!-- Form Delete Task -->
-                                <form role="form text-left" class="form-delete mt-3" id="form-delete">
+                                <form role="form text-left" class="form-delete mt-3">
                                     <input type="hidden" name="task_id" id="delete-task-id">
                                     <button type="submit" class="btn bg-gradient-danger btn-lg btn-rounded w-100 mt-4 mb-0">Delete</button>
                                 </form>
@@ -252,7 +252,7 @@
                             </div>
                             <label>Description</label>
                             <div class="input-group mb-3">
-                                <textarea name="description" class="form-control" placeholder="Description..." aria-label="Name" aria-describedby="name-addon">${task.description}</textarea>
+                                <textarea name="description" class="form-control" placeholder="Description..." aria-label="Name" aria-describedby="name-addon">${task.description ? $task.description : ''}</textarea>
                             </div>
                         `;
                         modal.find('#modal-body-content').append(content);
@@ -313,7 +313,7 @@
             });
         });
 
-        $('#form-delete').submit(function(e) {
+        $('.form-delete').submit(function(e) {
             e.preventDefault();
             let token = $('meta[name="csrf-token"]').attr('content');
             let taskId = $('#delete-task-id').val();
