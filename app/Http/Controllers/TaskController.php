@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Status;
 use App\Models\Task;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -57,6 +58,13 @@ class TaskController extends Controller
             $task->save();
         }
         return response()->json(['code' => 200, 'message' => 'Status Task updated']);
+    }
+
+    public function edit(Request $request, $id)
+    {
+        $task = Task::findorFail($id);
+        $statuses = Status::all();
+        return response()->json(['code' => 200, 'task' => $task, 'statuses' => $statuses]);
     }
 
     public function update(Request $request, $id)

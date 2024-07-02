@@ -27,5 +27,6 @@ Route::middleware('auth')->group(function () {
         Route::post('/update-task-status', [TaskController::class, 'updateTaskStatus']);
         Route::post('/update/{id}', [TaskController::class, 'update']);
         Route::delete('/delete/{id}', [TaskController::class, 'destroy'])->name('task.destroy');
+        Route::get('/edit/{id}', [TaskController::class, 'edit'])->name('task.edit');
     });
 });

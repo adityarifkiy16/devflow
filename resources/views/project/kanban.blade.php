@@ -20,54 +20,7 @@
                                     {{ \Carbon\Carbon::parse($task->update_at)->isToday() ? 'Today' : \Carbon\Carbon::parse($task->update_at)->format('Y-m-d') }}
                                 </p>
                             </div>
-                            <a href="#" class="stretched-link" data-bs-toggle='modal' data-bs-target='#modal-edit-{{ $task->id }}'></a>
-                        </div>
-                    </div>
-                    <!-- Modal Edit -->
-                    <div class="modal fade" id="modal-edit-{{$task->id}}" tabindex="-1" role="dialog" aria-labelledby="modal-edit-{{ $task->id }}-Label" aria-hidden="true">
-                        <div class="modal-dialog modal-dialog-centered modal-md" role="document">
-                            <div class="modal-content">
-                                <div class="modal-body p-0">
-                                    <div class="card card-plain">
-                                        <div class="card-header pb-0 text-left">
-                                            <h3 class="font-weight-bolder text-primary text-gradient">Detail Task</h3>
-                                        </div>
-                                        <div class="card-body pb-3">
-                                            <form role="form text-left" class="form-edit" id="form-tambah-{{$status->id}}">
-                                                <div class="row">
-                                                    <div class="col">
-                                                        <input type="hidden" name='task_id' value="{{ $task->id }}">
-                                                        <label>Nama Task</label>
-                                                        <div class="input-group mb-3">
-                                                            <input type="text" name="title" class="form-control" placeholder="Task Name" aria-label="Name" aria-describedby="name-addon" value="{{ $task->title }}">
-                                                        </div>
-                                                        <label>Status</label>
-                                                        <select class="form-select" name="status_id" required>
-                                                            <option selected value="{{ $task->status_id }}">{{$task->status->title}}</option>
-                                                            @foreach($statuses as $status)
-                                                            <option value="{{ $status->id }}" {{ old('status') == $status->id ? 'selected' : '' }}>{{ $status->title }}</option>
-                                                            @endforeach
-                                                        </select>
-                                                        <label>Description</label>
-                                                        <div class="input-group mb-3">
-                                                            <textarea name="description" class="form-control" placeholder="Description..." aria-label="Name" aria-describedby="name-addon">{{ $task->description }}</textarea>
-                                                        </div>
-                                                    </div>
-                                                    <div class="text-center">
-                                                        <button type="submit" class="btn bg-gradient-primary btn-lg btn-rounded w-100 mt-4 mb-0">update</button>
-                                                    </div>
-                                                </div>
-                                            </form>
-                                            <!-- Form Delete Task -->
-                                            <form role="form text-left" class="form-delete mt-2" id="form-delete-{{ $task->id }}">
-                                                <input type="hidden" name="task_id" value="{{ $task->id }}">
-                                                <button type="submit" class="btn bg-gradient-danger btn-lg btn-rounded w-100 mt-2 mb-0">Delete</button>
-                                            </form>
-                                            <!-- End Form Delete Task -->
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            <a href="#" class="stretched-link" data-bs-toggle="modal" data-bs-target="#modal-edit" data-task-id="{{ $task->id }}"></a>
                         </div>
                     </div>
                     @endforeach
@@ -75,6 +28,36 @@
             </div>
         </div>
         @endforeach
+        <!-- Modal Edit/Detail Task -->
+        <div class="modal fade" id="modal-edit" tabindex="-1" role="dialog" aria-labelledby="modal-edit-Label" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-md" role="document">
+                <div class="modal-content">
+                    <div class="modal-body p-0">
+                        <div class="card card-plain">
+                            <div class="card-header pb-0 text-left">
+                                <h3 class="font-weight-bolder text-primary text-gradient" id="modal-title">Edit Task</h3>
+                            </div>
+                            <div class="card-body pb-3">
+                                <form role="form text-left" id="form-edit">
+                                    <div id="modal-body-content"></div>
+                                    <div class="text-center">
+                                        <button type="submit" class="btn bg-gradient-primary btn-lg btn-rounded w-100 mt-4 mb-0">Update</button>
+                                    </div>
+                                </form>
+
+                                <!-- Form Delete Task -->
+                                <form role="form text-left" class="form-delete mt-3" id="form-delete">
+                                    <input type="hidden" name="task_id" id="delete-task-id">
+                                    <button type="submit" class="btn bg-gradient-danger btn-lg btn-rounded w-100 mt-4 mb-0">Delete</button>
+                                </form>
+                                <!-- End Form Delete Task -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- End Modal Edit/Detail Task -->
     </div>
     <!-- Modal tambah -->
     @foreach($statuses as $status)
@@ -342,6 +325,144 @@
                     title: errorMessage
                 });
             }
+        });
+    });
+</script>
+<script>
+    $(document).ready(function() {
+        $('#modal-edit').on('show.bs.modal', function(event) {
+            var button = $(event.relatedTarget);
+            var taskId = button.data('task-id');
+            var modal = $(this);
+
+            // Clear previous content
+            modal.find('#modal-body-content').html('');
+
+            // Fetch task data and append to modal body
+            $.ajax({
+                url: `/task/edit/${taskId}`,
+                method: 'GET',
+                success: function(response) {
+                    if (response.code === 200) {
+                        let task = response.task;
+                        let statuses = response.statuses;
+                        let statusOptions = statuses.map(function(status) {
+                            let selected = '';
+                            if (task.status_id == status.id) {
+                                selected = 'selected'
+                            }
+                            return `<option value="${status.id}" ${selected}>${status.title}</option>`;
+                        }).join('');
+                        var content = `
+                            <input type="hidden" name='task_id' value="${task.id}">
+                            <label>Nama Task</label>
+                            <div class="input-group mb-3">
+                                <input type="text" name="title" value="${task.title}" class="form-control" placeholder="Task Name" aria-label="Name" aria-describedby="name-addon">
+                            </div>
+                             <label>Status</label>
+                            <div class="input-group mb-3">
+                               <select name="status_id" class="form-control">
+                                  ${statusOptions}
+                                </select>
+                            </div>
+                            <label>Description</label>
+                            <div class="input-group mb-3">
+                                <textarea name="description" class="form-control" placeholder="Description..." aria-label="Name" aria-describedby="name-addon">${task.description}</textarea>
+                            </div>
+                        `;
+                        modal.find('#modal-body-content').append(content);
+                    } else {
+                        Swal.fire({
+                            icon: "error",
+                            title: 'Unable to fetch task data'
+                        });
+                    }
+                },
+                error: function(xhr) {
+                    let errorMessage = xhr.responseJSON.message ? xhr.responseJSON.message : 'An error occurred';
+                    Swal.fire({
+                        icon: "error",
+                        title: errorMessage
+                    });
+                }
+            });
+
+            modal.find('#delete-task-id').val(taskId);
+        });
+
+        $('#form-edit').submit(function(e) {
+            e.preventDefault();
+            let formData = $(this).serialize();
+            let token = $('meta[name="csrf-token"]').attr('content');
+            let taskId = $(this).find('input[name="task_id"]').val();
+
+            $.ajax({
+                url: `/task/update/${taskId}`,
+                type: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': token
+                },
+                data: formData,
+                success: function(response) {
+                    if (response.code === 200) {
+                        Swal.fire({
+                            icon: "success",
+                            title: response.message
+                        }).then(function() {
+                            window.location.reload();
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: "error",
+                            title: 'Unexpected Errors'
+                        });
+                    }
+                },
+                error: function(xhr) {
+                    let errorMessage = xhr.responseJSON.message ? xhr.responseJSON.message : 'An error occurred';
+                    Swal.fire({
+                        icon: "error",
+                        title: errorMessage
+                    });
+                }
+            });
+        });
+
+        $('#form-delete').submit(function(e) {
+            e.preventDefault();
+            let token = $('meta[name="csrf-token"]').attr('content');
+            let taskId = $('#delete-task-id').val();
+
+            $.ajax({
+                url: `/task/delete/${taskId}`,
+                type: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': token,
+                    'X-HTTP-Method-Override': 'DELETE'
+                },
+                success: function(response) {
+                    if (response.code === 200) {
+                        Swal.fire({
+                            icon: "success",
+                            title: response.message
+                        }).then(function() {
+                            window.location.reload();
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: "error",
+                            title: 'Unexpected Errors'
+                        });
+                    }
+                },
+                error: function(xhr) {
+                    let errorMessage = xhr.responseJSON.message ? xhr.responseJSON.message : 'An error occurred';
+                    Swal.fire({
+                        icon: "error",
+                        title: errorMessage
+                    });
+                }
+            });
         });
     });
 </script>
