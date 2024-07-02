@@ -28,7 +28,7 @@
     <main class="main-content position-relative border-radius-lg" style="height: 100vh;">
         <x-navbar-dashboard :page="$page" :subpage="$subpage" :title="$title" />
         @yield('content')
-        <x-footer />
+
     </main>
 
     <!-- Core JS -->
