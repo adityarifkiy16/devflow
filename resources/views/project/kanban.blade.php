@@ -1,7 +1,13 @@
 @extends('layouts.index', ['title' => $project->name, 'page' => 'Project', 'subpage' => 'Kanban Task'])
 @section('content')
 <div class="container-fluid my-5">
-    <h3 class="mb-4 text-white">{{ $project->name }} - Kanban Task</h3>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="text-white">{{ $project->name }} - Kanban Task</h3>
+        <form role="form text-left" class="project-delete" id="project-delete">
+            <input type="hidden" name="project_id" id="delete-project-id" value="{{ $project->id }}">
+            <button type="submit" class="btn bg-danger btn-lg btn-rounded w-100 mb-0 text-white">Delete</button>
+        </form>
+    </div>
     <div class="row">
         @foreach($statuses as $status)
         <div class="col-md-3 mt-3 p-1">
@@ -171,165 +177,44 @@
                 }
             });
         });
-    });
-</script>
-<script>
-    $('.form-tambah').submit(function(e) {
-        e.preventDefault();
 
-        const Toast = Swal.mixin({
-            toast: true,
-            position: "top-end",
-            showConfirmButton: false,
-            timer: 2000,
-            timerProgressBar: true,
-            didOpen: (toast) => {
-                toast.onmouseenter = Swal.stopTimer;
-                toast.onmouseleave = Swal.resumeTimer;
-            }
-        });
+        $('.form-tambah').submit(function(e) {
+            e.preventDefault();
+            let formData = $(this).serialize();
+            let token = $('meta[name="csrf-token"]').attr('content');
 
-        let formData = $(this).serialize();
-        let token = $('meta[name="csrf-token"]').attr('content');
-
-        $.ajax({
-            url: "{{ url('/task/store') }}",
-            type: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': token
-            },
-            data: formData,
-            success: function(response) {
-                if (response.code === 200) {
-                    Toast.fire({
-                        icon: "success",
-                        title: response.message
-                    }).then(function() {
-                        window.location.reload();
-                    });
-                } else {
+            $.ajax({
+                url: "{{ url('/task/store') }}",
+                type: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': token
+                },
+                data: formData,
+                success: function(response) {
+                    if (response.code === 200) {
+                        Toast.fire({
+                            icon: "success",
+                            title: response.message
+                        }).then(function() {
+                            window.location.reload();
+                        });
+                    } else {
+                        Toast.fire({
+                            icon: "error",
+                            title: 'Unexpected Errors'
+                        });
+                    }
+                },
+                error: function(xhr) {
+                    let errorMessage = xhr.responseJSON.message ? xhr.responseJSON.message : 'An error occurred';
                     Toast.fire({
                         icon: "error",
-                        title: 'Unexpected Errors'
+                        title: errorMessage
                     });
                 }
-            },
-            error: function(xhr) {
-                let errorMessage = xhr.responseJSON.message ? xhr.responseJSON.message : 'An error occurred';
-                Toast.fire({
-                    icon: "error",
-                    title: errorMessage
-                });
-            }
-        });
-    });
-</script>
-<script>
-    $('.form-edit').submit(function(e) {
-        e.preventDefault();
-
-        const Toast = Swal.mixin({
-            toast: true,
-            position: "top-end",
-            showConfirmButton: false,
-            timer: 2000,
-            timerProgressBar: true,
-            didOpen: (toast) => {
-                toast.onmouseenter = Swal.stopTimer;
-                toast.onmouseleave = Swal.resumeTimer;
-            }
+            });
         });
 
-        let formData = $(this).serialize();
-        let token = $('meta[name="csrf-token"]').attr('content');
-        let taskId = $(this).find('input[name="task_id"]').val();
-
-        $.ajax({
-            url: `/task/update/${taskId}`,
-            type: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': token
-            },
-            data: formData,
-            success: function(response) {
-                if (response.code === 200) {
-                    Toast.fire({
-                        icon: "success",
-                        title: response.message
-                    }).then(function() {
-                        window.location.reload();
-                    });
-                } else {
-                    Toast.fire({
-                        icon: "error",
-                        title: 'Unexpected Errors'
-                    });
-                }
-            },
-            error: function(xhr) {
-                let errorMessage = xhr.responseJSON.message ? xhr.responseJSON.message : 'An error occurred';
-                Toast.fire({
-                    icon: "error",
-                    title: errorMessage
-                });
-            }
-        });
-    });
-</script>
-<script>
-    $('.form-delete').submit(function(e) {
-        e.preventDefault();
-
-        const Toast = Swal.mixin({
-            toast: true,
-            position: "top-end",
-            showConfirmButton: false,
-            timer: 2000,
-            timerProgressBar: true,
-            didOpen: (toast) => {
-                toast.onmouseenter = Swal.stopTimer;
-                toast.onmouseleave = Swal.resumeTimer;
-            }
-        });
-
-        let formData = $(this).serialize();
-        let token = $('meta[name="csrf-token"]').attr('content');
-        let taskId = $(this).find('input[name="task_id"]').val();
-
-        $.ajax({
-            url: `/task/delete/${taskId}`,
-            type: 'DELETE',
-            headers: {
-                'X-CSRF-TOKEN': token
-            },
-            data: formData,
-            success: function(response) {
-                if (response.code === 200) {
-                    Toast.fire({
-                        icon: "success",
-                        title: response.message
-                    }).then(function() {
-                        window.location.reload();
-                    });
-                } else {
-                    Toast.fire({
-                        icon: "error",
-                        title: 'Unexpected Errors'
-                    });
-                }
-            },
-            error: function(xhr) {
-                let errorMessage = xhr.responseJSON.message ? xhr.responseJSON.message : 'An error occurred';
-                Toast.fire({
-                    icon: "error",
-                    title: errorMessage
-                });
-            }
-        });
-    });
-</script>
-<script>
-    $(document).ready(function() {
         $('#modal-edit').on('show.bs.modal', function(event) {
             var button = $(event.relatedTarget);
             var taskId = button.data('task-id');
@@ -405,14 +290,14 @@
                 data: formData,
                 success: function(response) {
                     if (response.code === 200) {
-                        Swal.fire({
+                        Toast.fire({
                             icon: "success",
                             title: response.message
                         }).then(function() {
                             window.location.reload();
                         });
                     } else {
-                        Swal.fire({
+                        Toast.fire({
                             icon: "error",
                             title: 'Unexpected Errors'
                         });
@@ -420,7 +305,7 @@
                 },
                 error: function(xhr) {
                     let errorMessage = xhr.responseJSON.message ? xhr.responseJSON.message : 'An error occurred';
-                    Swal.fire({
+                    Toast.fire({
                         icon: "error",
                         title: errorMessage
                     });
@@ -432,7 +317,6 @@
             e.preventDefault();
             let token = $('meta[name="csrf-token"]').attr('content');
             let taskId = $('#delete-task-id').val();
-
             $.ajax({
                 url: `/task/delete/${taskId}`,
                 type: 'POST',
@@ -442,14 +326,14 @@
                 },
                 success: function(response) {
                     if (response.code === 200) {
-                        Swal.fire({
+                        Toast.fire({
                             icon: "success",
                             title: response.message
                         }).then(function() {
                             window.location.reload();
                         });
                     } else {
-                        Swal.fire({
+                        Toast.fire({
                             icon: "error",
                             title: 'Unexpected Errors'
                         });
@@ -457,7 +341,44 @@
                 },
                 error: function(xhr) {
                     let errorMessage = xhr.responseJSON.message ? xhr.responseJSON.message : 'An error occurred';
-                    Swal.fire({
+                    Toast.fire({
+                        icon: "error",
+                        title: errorMessage
+                    });
+                }
+            });
+        });
+
+        $('#project-delete').submit(function(e) {
+            e.preventDefault();
+            let token = $('meta[name="csrf-token"]').attr('content');
+            let projectId = $('#delete-project-id').val();
+            console.log(projectId);
+            $.ajax({
+                url: `/project/${projectId}`,
+                type: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': token,
+                    'X-HTTP-Method-Override': 'DELETE'
+                },
+                success: function(response) {
+                    if (response.code === 200) {
+                        Toast.fire({
+                            icon: "success",
+                            title: response.message
+                        }).then(function() {
+                            window.location.href = '/project';
+                        });
+                    } else {
+                        Toast.fire({
+                            icon: "error",
+                            title: 'Unexpected Errors'
+                        });
+                    }
+                },
+                error: function(xhr) {
+                    let errorMessage = xhr.responseJSON.message ? xhr.responseJSON.message : 'An error occurred';
+                    Toast.fire({
                         icon: "error",
                         title: errorMessage
                     });

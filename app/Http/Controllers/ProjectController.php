@@ -39,8 +39,6 @@ class ProjectController extends Controller
         return view('project.index', compact('projects'));
     }
 
-
-
     public function store(Request $request)
     {
         $rules = [
@@ -65,5 +63,12 @@ class ProjectController extends Controller
         $tasks = $project->task;
         $statuses = Status::whereIn('slug', ['to-do', 'in-progress', 'done', 'production'])->get();
         return view('project.kanban', compact('project', 'tasks', 'statuses'));
+    }
+
+    public function destroy($id)
+    {
+        $project = Project::findOrFail($id);
+        $project->delete();
+        return response()->json(['code' => 200, 'message' => 'Project deleted successfully']);
     }
 }
