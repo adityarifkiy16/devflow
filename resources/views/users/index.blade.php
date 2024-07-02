@@ -39,9 +39,13 @@
                                     <td>
                                         <div class="d-flex justify-content-center px-2 py-1">
                                             <div class="d-flex flex-row justify-content-center align-items-center">
-                                                <button class="btn bg-gradient-success mb-0 me-1"><i class="fa fa-info text-white"></i></button>
-                                                <button class="btn bg-gradient-primary mb-0 me-1" data-bs-toggle="modal" data-bs-target="#modal-edit"><i class="fa fa-pen text-white"></i></button>
-                                                <button class="btn bg-gradient-danger mb-0"><i class="fa fa-trash text-white"></i></button>
+                                                <button class="btn bg-gradient-primary mb-0 me-1" data-bs-toggle="modal" data-bs-target="#modal-edit" data-user-id="{{$user->id}}"><i class="fa fa-pen text-white"></i></button>
+                                                <!-- Form Delete Task -->
+                                                <form role="form" class="form-delete" id="form-delete-{{ $user->id }}">
+                                                    <input type="hidden" name="user_id" value="{{ $user->id }}">
+                                                    <button class="btn bg-gradient-danger mb-0" type="submit"><i class="fa fa-trash text-white"></i></button>
+                                                </form>
+                                                <!-- End Form Delete Task -->
                                             </div>
                                         </div>
                                     </td>
@@ -124,7 +128,7 @@
     </div>
 </div>
 <!-- Modal edit -->
-<div class="modal fade" id="form-edit" tabindex="-1" role="dialog" aria-labelledby="exampleModalSignTitle" aria-hidden="true">
+<div class="modal fade" id="modal-edit" tabindex="-1" role="dialog" aria-labelledby="exampleModalSignTitle" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-md" role="document">
         <div class="modal-content">
             <div class="modal-body p-0">
@@ -134,32 +138,10 @@
                         <p class="mb-0">Masukan data user</p>
                     </div>
                     <div class="card-body pb-3">
-                        <form role="form text-left">
-                            @csrf
-                            @method('PUT')
-                            <label>Name</label>
-                            <div class="input-group mb-3">
-                                <input type="text" class="form-control" placeholder="Name" aria-label="Name" aria-describedby="name-addon">
-                            </div>
-                            <label>Email</label>
-                            <div class="input-group mb-3">
-                                <input type="email" class="form-control" placeholder="Email" aria-label="Email" aria-describedby="email-addon">
-                            </div>
-                            <label>Password</label>
-                            <div class="input-group mb-3">
-                                <input type="password" class="form-control" placeholder="Password" aria-label="Password" aria-describedby="password-addon">
-                            </div>
-                            <div class="form-group">
-                                <label for="role">Role</label>
-                                <select class="form-control">
-                                    <option selected value="{{$user->role_id}}">{{$user->role->name}}</option>
-                                    @foreach($roles as $role)
-                                    <option value="{{ $role->id }}" {{ old('role') == $role->id ? 'selected' : '' }}>{{ $role->name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
+                        <form role="form text-left" class="form-edit">
+                            <div id="modal-body-content"></div>
                             <div class="text-center">
-                                <button type="button" class="btn bg-gradient-primary btn-lg btn-rounded w-100 mt-4 mb-0">Tambah</button>
+                                <button type="submit" class="btn bg-gradient-primary btn-lg btn-rounded w-100 mt-4 mb-0">Update</button>
                             </div>
                         </form>
                     </div>
@@ -171,9 +153,7 @@
 @endsection
 @push('script')
 <script>
-    $('#form-tambah').submit(function(e) {
-        e.preventDefault();
-
+    $(document).ready(function() {
         const Toast = Swal.mixin({
             toast: true,
             position: "top-end",
@@ -185,39 +165,170 @@
                 toast.onmouseleave = Swal.resumeTimer;
             }
         });
-        let formData = $(this).serialize();
-        console.log(formData);
-        let token = $('meta[name="csrf-token"]').attr('content');
-        $.ajax({
-            url: "{{ route('users.store') }}",
-            type: 'POST',
-            headers: {
-                'X-CSRF-TOKEN': token
-            },
-            data: formData,
-            success: function(response) {
-                if (response.code === 200) {
-                    Toast.fire({
-                        icon: "success",
-                        title: response.message
-                    }).then(function() {
-                        window.location = '{{route("admin.dashboard")}}'
-                    });
-                } else {
+
+        $('#form-tambah').submit(function(e) {
+            e.preventDefault();
+            let formData = $(this).serialize();
+            console.log(formData);
+            let token = $('meta[name="csrf-token"]').attr('content');
+            $.ajax({
+                url: "{{ route('users.store') }}",
+                type: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': token
+                },
+                data: formData,
+                success: function(response) {
+                    if (response.code === 200) {
+                        Toast.fire({
+                            icon: "success",
+                            title: response.message
+                        }).then(function() {
+                            window.location = '{{route("admin.dashboard")}}'
+                        });
+                    } else {
+                        Toast.fire({
+                            icon: "error",
+                            title: 'Unexpected Errors'
+                        });
+                    }
+                },
+                error: function(xhr) {
+                    let errorMessage = xhr.responseJSON.message ? xhr.responseJSON.message : 'An error occurred';
                     Toast.fire({
                         icon: "error",
-                        title: 'Unexpected Errors'
+                        title: errorMessage
                     });
                 }
-            },
-            error: function(xhr) {
-                let errorMessage = xhr.responseJSON.message ? xhr.responseJSON.message : 'An error occurred';
-                Toast.fire({
-                    icon: "error",
-                    title: errorMessage
-                });
-            }
+            });
+        })
+
+        $('.form-delete').submit(function(e) {
+            e.preventDefault();
+            let token = $('meta[name="csrf-token"]').attr('content');
+            let form = $(this);
+            let userId = form.find("input[name='user_id']").val();
+
+            $.ajax({
+                url: `/users/${userId}`,
+                type: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': token,
+                    'X-HTTP-Method-Override': 'DELETE'
+                },
+                success: function(res) {
+                    Toast.fire({
+                        icon: "success",
+                        title: res.message
+                    }).then(function() {
+                        window.location = '/users'
+                    });
+                },
+                error: function(xhr) {
+                    let errorMessage = xhr.responseJSON.message ? xhr.responseJSON.message : 'An error occurred';
+                    Toast.fire({
+                        icon: "error",
+                        title: errorMessage
+                    });
+                }
+            });
         });
-    })
+
+        $('#modal-edit').on('show.bs.modal', function(e) {
+            let button = $(e.relatedTarget);
+            let userId = button.data('user-id');
+            let modal = $(this);
+            modal.find('#modal-body-content').html('');
+            $.ajax({
+                url: `/users/${userId}/edit`,
+                type: 'GET',
+                success: function(res) {
+                    if (res.code === 200) {
+                        let user = res.data.user;
+                        let roles = res.data.roles;
+                        let rolesOption = roles.map(function(role) {
+                            let selected = '';
+                            if (user.role_id == role.id) {
+                                selected = 'selected';
+                            }
+                            return `<option value=${role.id} ${selected}>${role.name}</option>`
+                        }).join('');
+                        let content = `
+                        <input type="hidden" name="user_id" value=${user.id}/>
+                        <label>Name</label>
+                                <div class="input-group mb-3">
+                                    <input type="text" name='name' class="form-control" placeholder="Name" aria-label="Name" aria-describedby="name-addon" value=${user.name}>
+                                </div>
+                                <label>Email</label>
+                                <div class="input-group mb-3">
+                                    <input type="email" class="form-control" name='email' placeholder="Email" aria-label="Email" aria-describedby="email-addon" value=${user.email}>
+                                </div>
+                                <label>Password</label>
+                                <div class="input-group mb-3">
+                                    <input type="password" class="form-control" name='password' placeholder="Password" aria-label="Password" aria-describedby="password-addon" value=${user.password}>
+                                </div>
+                                <div class="form-group">
+                                    <label for="role">Role</label>
+                                    <select class="form-control form-select" name='role'>
+                    ${rolesOption}
+                                    </select>
+                                </div>
+                        `
+                        modal.find('#modal-body-content').append(content);
+                    } else {
+                        Swal.fire({
+                            icon: "error",
+                            title: 'Unable to fetch task data'
+                        });
+                    }
+                },
+                error: function(xhr) {
+                    let errorMessage = xhr.responseJSON.message ? xhr.responseJSON.message : 'An error occurred';
+                    Swal.fire({
+                        icon: "error",
+                        title: errorMessage
+                    });
+                }
+            });
+        });
+
+        $('.form-edit').submit(function(e) {
+            e.preventDefault();
+            let formData = $(this).serialize();
+            let token = $('meta[name="csrf-token"]').attr('content');
+            let userId = $(this).find('input[name="user_id"]').val();
+
+            $.ajax({
+                url: `/users/${userId}`,
+                type: 'PUT',
+                headers: {
+                    'X-CSRF-TOKEN': token,
+                },
+                data: formData,
+                success: function(response) {
+                    if (response.code === 200) {
+                        Toast.fire({
+                            icon: "success",
+                            title: response.message
+                        }).then(function() {
+                            window.location.reload();
+                        });
+                    } else {
+                        Toast.fire({
+                            icon: "error",
+                            title: 'Unexpected Errors'
+                        });
+                    }
+                },
+                error: function(xhr) {
+                    let errorMessage = xhr.responseJSON.message ? xhr.responseJSON.message : 'An error occurred';
+                    Toast.fire({
+                        icon: "error",
+                        title: errorMessage
+                    });
+                }
+            });
+        });
+    });
 </script>
 @endpush
