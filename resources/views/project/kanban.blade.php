@@ -20,7 +20,48 @@
                                     {{ \Carbon\Carbon::parse($task->created_at)->isToday() ? 'Today' : \Carbon\Carbon::parse($task->created_at)->format('Y-m-d') }}
                                 </p>
                             </div>
-                            <a href="{{ route('project.kanban', $project->id) }}" class="stretched-link"></a>
+                            <a href="#" class="stretched-link" data-bs-toggle='modal' data-bs-target='#modal-edit-{{ $task->id }}'></a>
+                        </div>
+                    </div>
+                    <!-- Modal Edit -->
+                    <div class="modal fade" id="modal-edit-{{$task->id}}" tabindex="-1" role="dialog" aria-labelledby="modal-edit-{{ $task->id }}-Label" aria-hidden="true">
+                        <div class="modal-dialog modal-dialog-centered modal-md" role="document">
+                            <div class="modal-content">
+                                <div class="modal-body p-0">
+                                    <div class="card card-plain">
+                                        <div class="card-header pb-0 text-left">
+                                            <h3 class="font-weight-bolder text-primary text-gradient">Detail Task</h3>
+                                        </div>
+                                        <div class="card-body pb-3">
+                                            <form role="form text-left" class="form-edit" id="form-tambah-{{$status->id}}">
+                                                <div class="row">
+                                                    <div class="col">
+                                                        <input type="hidden" name='task_id' value="{{ $task->id }}">
+                                                        <label>Nama Task</label>
+                                                        <div class="input-group mb-3">
+                                                            <input type="text" name="title" class="form-control" placeholder="Task Name" aria-label="Name" aria-describedby="name-addon" value="{{ $task->title }}">
+                                                        </div>
+                                                        <label>Status</label>
+                                                        <select class="form-select" name="status_id" required>
+                                                            <option selected value="{{ $task->status_id }}">{{$task->status->title}}</option>
+                                                            @foreach($statuses as $status)
+                                                            <option value="{{ $status->id }}" {{ old('status') == $status->id ? 'selected' : '' }}>{{ $status->title }}</option>
+                                                            @endforeach
+                                                        </select>
+                                                        <label>Description</label>
+                                                        <div class="input-group mb-3">
+                                                            <textarea name="description" class="form-control" placeholder="Description..." aria-label="Name" aria-describedby="name-addon">{{ $task->description }}</textarea>
+                                                        </div>
+                                                    </div>
+                                                    <div class="text-center">
+                                                        <button type="submit" class="btn bg-gradient-primary btn-lg btn-rounded w-100 mt-4 mb-0">update</button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     @endforeach
@@ -66,6 +107,7 @@
         </div>
     </div>
     @endforeach
+
 </div>
 @endsection
 
@@ -163,6 +205,58 @@
 
         $.ajax({
             url: "{{ url('/task/store') }}",
+            type: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': token
+            },
+            data: formData,
+            success: function(response) {
+                if (response.code === 200) {
+                    Toast.fire({
+                        icon: "success",
+                        title: response.message
+                    }).then(function() {
+                        window.location.reload();
+                    });
+                } else {
+                    Toast.fire({
+                        icon: "error",
+                        title: 'Unexpected Errors'
+                    });
+                }
+            },
+            error: function(xhr) {
+                let errorMessage = xhr.responseJSON.message ? xhr.responseJSON.message : 'An error occurred';
+                Toast.fire({
+                    icon: "error",
+                    title: errorMessage
+                });
+            }
+        });
+    });
+</script>
+<script>
+    $('.form-edit').submit(function(e) {
+        e.preventDefault();
+
+        const Toast = Swal.mixin({
+            toast: true,
+            position: "top-end",
+            showConfirmButton: false,
+            timer: 2000,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+                toast.onmouseenter = Swal.stopTimer;
+                toast.onmouseleave = Swal.resumeTimer;
+            }
+        });
+
+        let formData = $(this).serialize();
+        let token = $('meta[name="csrf-token"]').attr('content');
+        let taskId = $(this).find('input[name="task_id"]').val();
+
+        $.ajax({
+            url: `/task/update/${taskId}`,
             type: 'POST',
             headers: {
                 'X-CSRF-TOKEN': token

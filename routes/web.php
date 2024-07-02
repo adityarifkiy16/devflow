@@ -24,6 +24,7 @@ Route::middleware('auth')->group(function () {
 
     Route::prefix('task')->group(function () {
         Route::post('/store', [TaskController::class, 'store']);
-        Route::post('/update-task-status', [TaskController::class, 'updateTask']);
+        Route::post('/update-task-status', [TaskController::class, 'updateTaskStatus']);
+        Route::post('/update/{id}', [TaskController::class, 'update']);
     });
 });
