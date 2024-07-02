@@ -17,7 +17,7 @@
                             <h5 class="card-title">{{ $task->title }}</h5>
                             <div class="d-flex justify-content-between mt-1">
                                 <p class="card-text text-xs"><i class="fa fa-clock fa-xs me-1"></i>
-                                    {{ \Carbon\Carbon::parse($task->created_at)->isToday() ? 'Today' : \Carbon\Carbon::parse($task->created_at)->format('Y-m-d') }}
+                                    {{ \Carbon\Carbon::parse($task->update_at)->isToday() ? 'Today' : \Carbon\Carbon::parse($task->update_at)->format('Y-m-d') }}
                                 </p>
                             </div>
                             <a href="#" class="stretched-link" data-bs-toggle='modal' data-bs-target='#modal-edit-{{ $task->id }}'></a>
@@ -58,6 +58,12 @@
                                                     </div>
                                                 </div>
                                             </form>
+                                            <!-- Form Delete Task -->
+                                            <form role="form text-left" class="form-delete mt-2" id="form-delete-{{ $task->id }}">
+                                                <input type="hidden" name="task_id" value="{{ $task->id }}">
+                                                <button type="submit" class="btn bg-gradient-danger btn-lg btn-rounded w-100 mt-2 mb-0">Delete</button>
+                                            </form>
+                                            <!-- End Form Delete Task -->
                                         </div>
                                     </div>
                                 </div>
@@ -258,6 +264,58 @@
         $.ajax({
             url: `/task/update/${taskId}`,
             type: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': token
+            },
+            data: formData,
+            success: function(response) {
+                if (response.code === 200) {
+                    Toast.fire({
+                        icon: "success",
+                        title: response.message
+                    }).then(function() {
+                        window.location.reload();
+                    });
+                } else {
+                    Toast.fire({
+                        icon: "error",
+                        title: 'Unexpected Errors'
+                    });
+                }
+            },
+            error: function(xhr) {
+                let errorMessage = xhr.responseJSON.message ? xhr.responseJSON.message : 'An error occurred';
+                Toast.fire({
+                    icon: "error",
+                    title: errorMessage
+                });
+            }
+        });
+    });
+</script>
+<script>
+    $('.form-delete').submit(function(e) {
+        e.preventDefault();
+
+        const Toast = Swal.mixin({
+            toast: true,
+            position: "top-end",
+            showConfirmButton: false,
+            timer: 2000,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+                toast.onmouseenter = Swal.stopTimer;
+                toast.onmouseleave = Swal.resumeTimer;
+            }
+        });
+
+        let formData = $(this).serialize();
+        let token = $('meta[name="csrf-token"]').attr('content');
+        let taskId = $(this).find('input[name="task_id"]').val();
+
+        $.ajax({
+            url: `/task/delete/${taskId}`,
+            type: 'DELETE',
             headers: {
                 'X-CSRF-TOKEN': token
             },

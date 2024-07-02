@@ -80,4 +80,11 @@ class TaskController extends Controller
         $task->save();
         return response()->json(['code' => 200, 'message' => 'Tasks updated successfully.']);
     }
+
+    public function destroy($id)
+    {
+        $task = Task::findOrFail($id);
+        $task->delete();
+        return response()->json(['code' => 200, 'message' => 'Task deleted successfully']);
+    }
 }
