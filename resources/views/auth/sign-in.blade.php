@@ -81,7 +81,7 @@
 
     // Send AJAX request
     $.ajax({
-      url: "{{ url('/login') }}",
+      url: "/login",
       type: 'POST',
       headers: {
         'X-CSRF-TOKEN': token
