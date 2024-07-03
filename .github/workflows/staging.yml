@@ -21,6 +21,6 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           server-dir: /devflow/
           timeout: 60000
-          protocol: ftps # Use FTPS if supported
+          protocol: ftp
           port: 21
           log-level: verbose
