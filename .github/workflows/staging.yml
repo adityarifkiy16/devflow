@@ -13,12 +13,9 @@ jobs:
 
       - name: 📂 Sync files
         uses: SamKirkland/FTP-Deploy-Action@v2.0.0
+        env:
         with:
-          server: ftp.intiwika.my.id
+          server: ${{ secrets.ftp_server }}
           username: ${{ secrets.ftp_username }}
           password: ${{ secrets.ftp_password }}
           server-dir: /devflow/
-          log-level: verbose
-          timeout: 60000
-          port: 21
-          protocol: ftp
