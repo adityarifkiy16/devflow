@@ -21,3 +21,6 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           server-dir: /devflow/
           timeout: 60000
+          protocol: ftps # Use FTPS if supported
+          passive: true # Enable passive mode
+          log-level: verbose
