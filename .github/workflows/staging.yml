@@ -1,44 +1,22 @@
-name: 🚀 Deploy
+name: Deploy to cPanel
+
 on:
   push:
     branches:
       - dev
+
 jobs:
-  deploy:
-    name: 🚀 Deploy to CPanel
+  ftp-deploy:
     runs-on: ubuntu-latest
+
     steps:
-      - name: 🚚 Get Latest Code
-        uses: actions/checkout@v4.1.2
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-      - name: ⚙️ Use PHP 8.3
-        uses: shivammathur/setup-php@main
+      - name: FTP Deploy
+        uses: SamKirkland/FTP-Deploy-Action@4.3.0
         with:
-          php-version: "8.3"
-
-      - name: ⚙️ Use NodeJS 20
-        uses: actions/setup-node@v4.0.2
-        with:
-          node-version: "20"
-
-      - name: 🔨 Install Dependencies PHP
-        run: composer install
-
-      - name: 🔨 Install Dependencies JS
-        run: npm install
-
-      - name: 🗄️ Copy .env
-        run: cp .env.example .env
-
-      - name: 🗑️ Delete Build Folder
-        run: rm -rf public/build
-
-      - name: 🔨 Build Frontend (Inertia + React)
-        run: npm run build
-
-      - name: 🚀 Deploy to CPanel
-        env:
-          FTP_SERVER: ${{ secrets.ftp_server }}
-          FTP_USERNAME: ${{ secrets.ftp_username }}
-          FTP_PASSWORD: ${{ secrets.ftp_password }}
-        run: npm run deploy
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: /devflow/
