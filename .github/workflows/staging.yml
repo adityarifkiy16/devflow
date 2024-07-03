@@ -39,6 +39,6 @@ jobs:
       - name: 🚀 Deploy to CPanel
         env:
           FTP_SERVER: ${{ secrets.ftp_server }}
-          FTP_USERNAME: ${{ secrets.ftp_server }}
-          FTP_PASSWORD: ${{ secrets.ftp_server }}
+          FTP_USERNAME: ${{ secrets.ftp_username }}
+          FTP_PASSWORD: ${{ secrets.ftp_password }}
         run: npm run deploy
