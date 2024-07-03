@@ -9,10 +9,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: 🚚 Get latest code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v3
 
       - name: 📂 Sync files
-        uses: SamKirkland/FTP-Deploy-Action@v4.1.0
+        uses: SamKirkland/FTP-Deploy-Action@v4.0.0
         with:
           server: ${{ secrets.ftp_server }}
           username: ${{ secrets.ftp_username }}
