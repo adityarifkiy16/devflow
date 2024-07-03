@@ -12,10 +12,11 @@ jobs:
         uses: actions/checkout@v4
 
       - name: 📂 Sync files
-        run: npm run deploy
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ftp.intiwika.my.id
           username: ${{ secrets.ftp_username }}
           password: ${{ secrets.ftp_password }}
           server-dir: /devflow/
           debug: true
+        run: npm run deploy
