@@ -18,5 +18,7 @@ jobs:
           username: ${{ secrets.ftp_username }}
           password: ${{ secrets.ftp_password }}
           server-dir: /devflow/
-        log-level: verbose
-        timeout: 60000
+          log-level: verbose
+          timeout: 60000
+          port: 21
+          protocol: ftp
