@@ -12,7 +12,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: 📂 Sync files
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        uses: SamKirkland/FTP-Deploy-Action@v2.0.0
         with:
           server: ftp.intiwika.my.id
           username: ${{ secrets.ftp_username }}
