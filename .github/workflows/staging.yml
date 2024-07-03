@@ -22,5 +22,5 @@ jobs:
           server-dir: /devflow/
           timeout: 60000
           protocol: ftps # Use FTPS if supported
-          passive: true # Enable passive mode
+          port: 21
           log-level: verbose
