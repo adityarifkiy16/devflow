@@ -18,5 +18,3 @@ jobs:
           username: ${{ secrets.ftp_username }}
           password: ${{ secrets.ftp_password }}
           server-dir: /devflow/
-          debug: true
-        run: npm run deploy
