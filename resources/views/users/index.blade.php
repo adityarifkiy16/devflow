@@ -6,7 +6,9 @@
             <div class="card mb-4">
                 <div class="card-header pb-3 d-flex justify-content-between">
                     <h5>Users table</h5>
+                    @if(auth()->check() && in_array(auth()->user()->role_id, [1,2,3]))
                     <button class="btn text-white bg-primary mb-0 me-1 py-1 px-2 d-flex align-items-center" data-bs-toggle='modal' data-bs-target='#modal-tambah'><i class="ni ni-fat-add text-white me-1"></i>Tambah</button>
+                    @endif
                 </div>
                 <div class="card-body px-0 pt-0 pb-2">
                     <div class="table-responsive p-0">
@@ -106,7 +108,10 @@
                                     </div>
                                     <label>Password</label>
                                     <div class="input-group mb-3">
-                                        <input type="password" name="password" class="form-control" placeholder="Password" aria-label="Password" aria-describedby="password-addon">
+                                        <input type="password" name="password" class="form-control" placeholder="Password" aria-label="Password" aria-describedby="password-addon" id="new-password">
+                                        <button type="button" class="btn btn-outline-secondary toggle-password mb-0" data-toggle="#new-password">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
                                     </div>
                                     <label>Role</label>
                                     <select class="form-select" name="role" required>
@@ -240,11 +245,12 @@
             let modal = $(this);
             modal.find('#modal-body-content').html('');
             $.ajax({
-                url: `/users/${userId}/edit`,
+                url: `/users/${userId}/edit?include_roles=true`,
                 type: 'GET',
                 success: function(res) {
                     if (res.code === 200) {
                         let user = res.data.user;
+                        console.log(user);
                         let roles = res.data.roles;
                         let rolesOption = roles.map(function(role) {
                             let selected = '';
@@ -263,10 +269,20 @@
                                 <div class="input-group mb-3">
                                     <input type="email" class="form-control" name='email' placeholder="Email" aria-label="Email" aria-describedby="email-addon" value=${user.email}>
                                 </div>
-                                <label>Password</label>
+                                <label>New Password (optional)</label>
                                 <div class="input-group mb-3">
-                                    <input type="password" class="form-control" name='password' placeholder="Password" aria-label="Password" aria-describedby="password-addon" value=${user.password}>
+                                    <input type="password" class="form-control" id='edit-password' name='password' placeholder="Password" aria-label="Password" aria-describedby="password-addon">
+                                    <button type="button" class="btn btn-outline-secondary toggle-password mb-0" data-toggle="#edit-password">
+                                            <i class="fas fa-eye"></i>
+                                    </button>
                                 </div>
+                                <label>Confirm New Password (optional)</label>
+                                <div class="input-group mb-3">
+                                    <input type="password" class="form-control" name="password_confirmation" placeholder="Confirm New Password" aria-label="Confirm New Password" aria-describedby="password-confirmation-addon" id="confirm-password">
+                                    <button type="button" class="btn btn-outline-secondary toggle-password mb-0" data-toggle="#confirm-password">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>  
                                 <div class="form-group">
                                     <label for="role">Role</label>
                                     <select class="form-control form-select" name='role'>
@@ -328,6 +344,19 @@
                     });
                 }
             });
+        });
+
+        $(document).on('click', '.toggle-password', function() {
+            let input = $($(this).data('toggle'));
+            let icon = $(this).find('i');
+
+            if (input.attr('type') === 'password') {
+                input.attr('type', 'text');
+                icon.removeClass('fa-eye').addClass('fa-eye-slash');
+            } else {
+                input.attr('type', 'password');
+                icon.removeClass('fa-eye-slash').addClass('fa-eye');
+            }
         });
     });
 </script>

@@ -63,11 +63,14 @@ class UserController extends Controller
         ]);
     }
 
-    public function edit(string $id)
+    public function edit(Request $request, string $id)
     {
         $user = User::findorFail($id);
-        $roles = Role::whereIn('name', ['PM', 'Tester', 'Developer'])->get();
-        return response()->json(['code' => 200, 'data' => ['user' => $user, 'roles' => $roles]], 200);
+        if ($request->query('include_roles', false)) {
+            $roles = Role::whereIn('name', ['PM', 'Tester', 'Developer'])->get();
+            return response()->json(['code' => 200, 'data' => ['user' => $user, 'roles' => $roles]], 200);
+        }
+        return view('users.edit-user', compact('user'));
     }
 
     public function update(Request $request, $id)
@@ -76,8 +79,8 @@ class UserController extends Controller
         $rules = [
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255|unique:musers,email,' . $user->id,
-            'password' => 'required|min:6',
-            'role' => 'required|exists:mroles,id'
+            'password' => 'nullable|min:6|confirmed',
+            'role' => 'nullable|exists:mroles,id'
         ];
 
         $customMessages = [
@@ -90,11 +93,18 @@ class UserController extends Controller
         ];
 
         $data = $request->validate($rules, $customMessages);
-        $data['password'] = Hash::make($data['password']);
+
+        if ($request->filled('password')) {
+            $data['password'] = Hash::make($data['password']);
+            $user->password = $data['password'];
+        }
+
+        if (isset($data['role'])) {
+            $user->role_id = $data['role'];
+        }
+
         $user->name = $data['name'];
         $user->email = $data['email'];
-        $user->role_id = $data['role'];
-        $user->password = $data['password'];
         $user->save();
 
         return response()->json(['code' => 200, 'message' => 'successfully update user!']);

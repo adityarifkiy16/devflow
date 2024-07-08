@@ -28,6 +28,7 @@
             <li class="nav-item mt-3">
                 <h6 class="ps-4 ms-2 text-uppercase text-xs font-weight-bolder opacity-6">Account pages</h6>
             </li>
+            @if(auth()->check() && in_array(auth()->user()->role_id, [1,2]))
             <li class="nav-item">
                 <a class="nav-link {{ Request::routeIs('users.index') ? 'active' : '' }}" href="{{ route('users.index') }}">
                     <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
@@ -36,6 +37,17 @@
                     <span class="nav-link-text ms-1">User</span>
                 </a>
             </li>
+            @endif
+            @if(auth()->check() && in_array(auth()->user()->role_id, [2,3,4]))
+            <li class="nav-item">
+                <a class="nav-link {{ Request::routeIs('users.edit') ? 'active' : '' }}" href="{{ route('users.edit', auth()->user()->id) }}">
+                    <div class="icon icon-shape icon-sm border-radius-md text-center me-2 d-flex align-items-center justify-content-center">
+                        <i class="ni ni-single-02 text-dark text-sm opacity-10"></i>
+                    </div>
+                    <span class="nav-link-text ms-1">Change Profile</span>
+                </a>
+            </li>
+            @endif
             <li class="nav-item">
                 <form id="logout-form" class="px-4">
                     @csrf
