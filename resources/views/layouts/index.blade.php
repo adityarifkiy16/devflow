@@ -101,7 +101,6 @@
 
         })
     </script>
-
     @stack('script')
 </body>
 

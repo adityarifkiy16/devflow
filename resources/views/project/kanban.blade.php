@@ -44,19 +44,11 @@
                                 <h3 class="font-weight-bolder text-primary text-gradient" id="modal-title">Edit Task</h3>
                             </div>
                             <div class="card-body pb-3">
-                                <form role="form text-left" id="form-edit">
+                                <form id="form-edit">
                                     <div id="modal-body-content"></div>
-                                    <div class="text-center">
-                                        <button type="submit" class="btn bg-gradient-primary btn-lg btn-rounded w-100 mt-4 mb-0">Update</button>
-                                    </div>
                                 </form>
-
-                                <!-- Form Delete Task -->
-                                <form role="form text-left" class="form-delete mt-3">
-                                    <input type="hidden" name="task_id" id="delete-task-id">
-                                    <button type="submit" class="btn bg-gradient-danger btn-lg btn-rounded w-100 mt-4 mb-0">Delete</button>
+                                <form id="form-delete">
                                 </form>
-                                <!-- End Form Delete Task -->
                             </div>
                         </div>
                     </div>
@@ -76,7 +68,7 @@
                             <h3 class="font-weight-bolder text-primary text-gradient">Tambah Task</h3>
                         </div>
                         <div class="card-body pb-3">
-                            <form role="form text-left" class="form-tambah" id="form-tambah-{{$status->id}}">
+                            <form role="form text-left" class="form-tambah" id="form-tambah-{{$status->id}}" enctype="multipart/form-data">
                                 <div class="row">
                                     <div class="col">
                                         <input type="hidden" name='status_id' value="{{ $status->id }}">
@@ -88,6 +80,9 @@
                                         <label>Description</label>
                                         <div class="input-group mb-3">
                                             <textarea name="description" class="form-control" placeholder="Description..." aria-label="Name" aria-describedby="name-addon"></textarea>
+                                        </div>
+                                        <div class="input-group mb-3">
+                                            <input type="file" name="files[]" class="form-control" multiple>
                                         </div>
                                     </div>
                                     <div class="text-center">
@@ -180,12 +175,15 @@
 
         $('.form-tambah').submit(function(e) {
             e.preventDefault();
-            let formData = $(this).serialize();
+            var formData = new FormData(this);
             let token = $('meta[name="csrf-token"]').attr('content');
 
             $.ajax({
                 url: "{{ url('/task/store') }}",
                 type: 'POST',
+                cache: false,
+                contentType: false,
+                processData: false,
                 headers: {
                     'X-CSRF-TOKEN': token
                 },
@@ -222,6 +220,7 @@
 
             // Clear previous content
             modal.find('#modal-body-content').html('');
+            modal.find('#form-delete').html('');
 
             // Fetch task data and append to modal body
             $.ajax({
@@ -231,6 +230,15 @@
                     if (response.code === 200) {
                         let task = response.task;
                         let statuses = response.statuses;
+                        let files = response.file;
+                        let fileDisplay = files.map(function(file) {
+                            let fileName = file.path.split('/').pop();
+                            let fileUrl = `/storage/${file.path.replace('public/', '')}`;
+                            return `<div>
+                                        <img src="${fileUrl}" alt="${fileName}" style="max-width: 200px; max-height: 200px;">
+                                    </div>`;
+                        }).join('');
+
                         let statusOptions = statuses.map(function(status) {
                             let selected = '';
                             if (task.status_id == status.id) {
@@ -252,10 +260,24 @@
                             </div>
                             <label>Description</label>
                             <div class="input-group mb-3">
-                                <textarea name="description" class="form-control" placeholder="Description..." aria-label="Name" aria-describedby="name-addon">${task.description ? $task.description : ''}</textarea>
+                                <textarea name="description" class="form-control" placeholder="Description..." aria-label="Name" aria-describedby="name-addon">${task.description || ''}</textarea>
+                            </div>
+                            <label>File Gambar</label>
+                            <div class="input-group mb-3">
+                                <input type="file" name="files[]" class="form-control" multiple>
+                            </div>
+                                ${fileDisplay}
+                            <div class="text-center">
+                                <button type="submit" class="btn bg-gradient-primary btn-lg btn-rounded w-100 mt-4 mb-0">Update</button>
                             </div>
                         `;
+
+                        let buttondelete = `
+                         <input type="hidden" name="task_id" id="delete-task-id" value="${task.id}">
+                         <button type="submit" class="btn bg-gradient-danger btn-lg btn-rounded w-100 mt-2 mb-0">Delete</button>`;
+
                         modal.find('#modal-body-content').append(content);
+                        modal.find('#form-delete').append(buttondelete);
                     } else {
                         Swal.fire({
                             icon: "error",
@@ -277,13 +299,16 @@
 
         $('#form-edit').submit(function(e) {
             e.preventDefault();
-            let formData = $(this).serialize();
+            let formData = new FormData(this);
             let token = $('meta[name="csrf-token"]').attr('content');
             let taskId = $(this).find('input[name="task_id"]').val();
 
             $.ajax({
                 url: `/task/update/${taskId}`,
                 type: 'POST',
+                cache: false,
+                contentType: false,
+                processData: false,
                 headers: {
                     'X-CSRF-TOKEN': token
                 },
@@ -313,8 +338,9 @@
             });
         });
 
-        $('.form-delete').submit(function(e) {
+        $('#form-delete').submit(function(e) {
             e.preventDefault();
+            console.log('click delete');
             let token = $('meta[name="csrf-token"]').attr('content');
             let taskId = $('#delete-task-id').val();
             $.ajax({
